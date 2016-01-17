@@ -1,0 +1,279 @@
+/*==============================*\
+General style
+\*==============================*/
+
+@import url(https://fonts.googleapis.com/css?family=Dosis:600);
+
+body{
+  margin: 0;
+  padding: 0;
+  border: none;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  background-color: #3a2a67;
+  text-align: center;
+  text-decoration: none !important;
+  text-transform: uppercase;
+  font-family: "Dosis", sans-serif;
+  font-weight: 100;
+  font-size: 24px;
+  color: white;
+}
+
+.section, .section-small {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border: none;
+  display: flex;
+  width: 100%;
+  height: 72px;
+  /*min-height: 72px;*/
+  align-items: center;
+  justify-content: center;
+}
+
+.section-small {
+  height: 48px;
+}
+
+
+/*==============================*\
+Login View
+\*==============================*/
+
+.logo-background {
+  background-color: #514080;
+}
+
+::-webkit-input-placeholder{
+  size: 30px;
+  color: white;
+}
+
+:placeholder-shown {
+  font-size: inherit;
+  color: white;
+}
+
+input, select, textarea, .button {
+  text-transform: inherit;
+  text-align: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  color: white;
+}
+
+.button, input {
+  border-radius: 0;
+}
+
+*:focus {
+  outline: none;
+}
+
+.inputUsername{
+  background-color: black;
+}
+
+.button {
+  width: 100%;
+  font-size: inherit;
+  color: white;
+  height: 100%;
+  text-align: center;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  border-width: 0;
+  font-family: "Dosis", sans-serif;
+}
+
+#loginButton, .loggedInUser{
+   background-color: #1CB1AD;
+}
+
+#signupButton, #addFriend{
+  background-color: #1AA35F;
+}
+
+.username, .friendSearch {
+  background-color: #3b55a3;
+}
+
+.password {
+  background-color: #4A87C8;
+}
+
+.email {
+  background-color: #4570b4;
+}
+/*==============================*\
+Signup View
+\*==============================*/
+
+#goBackButton{
+ background-color: #A5DA38;
+}
+
+/*==============================*\
+Main View
+\*==============================*/
+
+#logo{
+  max-height: 48px;
+  max-width: 80%;
+  margin: auto;
+}
+
+.topButton{
+  background-color: #2C2D39;
+}
+
+.brewskiButton{
+  background-color: #fdc656;
+}
+
+.grayButton{
+ background-color: #ca6634;
+}
+
+#broskiButton{
+  background-color: #fc9c48;
+}
+
+.greenButton{
+  background-color: #1AA35F;
+}
+
+.invite-row:nth-child(even) > .section-small > .brewskiInvite {
+  background-color: #9e2f22;
+}
+
+.invite-row:nth-child(odd) > .section-small > .brewskiInvite {
+  background-color: #87271d;
+}
+
+.invite-row:nth-child(even) > .section-small > .broskiInvite {
+  background-color: #b54432;
+}
+
+.invite-row:nth-child(odd) > .section-small > .broskiInvite {
+  background-color: #a13c2d;
+}
+
+
+/*==============================*\
+Event View
+\*==============================*/
+
+#map{
+  clear:both;
+}
+
+.eventInfo{
+  min-height: 64px;
+}
+
+#eventLocation{
+  /*background-color: #FEC417;*/
+  background-color: #fc9c48;
+}
+
+#eventUber{
+  background-color: #3b55a3;
+}
+
+#map-canvas{
+  width: 100%;
+  height: 225px;
+  margin: auto;
+  padding: 0;
+  position: relative;
+}
+
+.eventInfo > div {
+  padding: 16px;
+}
+
+/*==============================*\
+Settings Page
+\*==============================*/
+
+/*#addFriend{
+  background-color: #D5513D;
+}*/
+
+.friends:nth-child(even){
+  background-color: #4A87C8;
+}
+
+.friends:nth-child(odd){
+  background-color: #4570b4;
+}
+
+#logoutButton{
+   background-color: #B80000;
+}
+
+/*==============================*\
+Misc
+\*==============================*/
+
+.event {
+  background-color: green;
+}
+
+.error, .logout {
+  background-color: #d63c3c;
+}
+
+
+/*==============================*\
+Notifications
+\*==============================*/
+
+/*  WORKS!
+.notification {
+  position: fixed;
+  bottom: -60px;
+  height: 60px;
+  width: 100%;
+  background-color: red;
+}
+
+.animate {
+  animation: notificationChanger 3s 1;
+}
+
+@-webkit-keyframes notificationChanger {
+  0% {bottom: -60px;}
+  50% {bottom: 0px;}
+  100% {bottom: -60px;}
+}
+
+@keyframes notificationChanger {
+  0% {bottom: -60px;}
+  50% {bottom: 0px;}
+  100% {bottom: -60px;}
+}*/
+
+.notification {
+  position: fixed;
+  bottom: -48px;
+  height: 48px;
+  width: 100%;
+  max-width: 720px;
+  background-color: #d63c3c;
+  transition:bottom linear 0.5s;
+  transform: translate(-50%, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification.animate {
+  bottom: 0;
+}

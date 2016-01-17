@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html >
+<div class="section logo-background">
+  <img id="logo" src="/assets/bblogo.png">
+</div>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <title>Brewski Broski Login</title>
+    <link rel="stylesheet" type="text/css" href="assets/stylesheet.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+    <script src="https://code.angularjs.org/1.4.8/angular-messages.min.js"></script>
+    <script src="auth.js"></script>
+    <script src="controllers/loginController.js"></script>
+    <script src="controllers/signupController.js"></script>
+    <script src="factories/authFactory.js"></script>
+  </head>
+  <body ng-app = "Auth">
+    <!-- the ng-view directive is where our templates will be loaded into when navigated to -->
+    <div ui-view>
+
+    </div>
+  </body>
+</html>
