@@ -43,7 +43,7 @@ router.post('/signup', function(request, response) {
       }
     }).spread(function(result, created) {
       if (created === true) {
-        console.log('You\'re now a Bro, bro!')
+        console.log('Account added.')
         util.createSession(request, response, result.dataValues.id);
       } else {
         var dirname = __dirname;
@@ -62,7 +62,6 @@ router.post('/login', function(request, response) {
   var password = request.body.password;
 
   console.log('Attempted login username: ' + request.body.username);
-  console.log('Attempted login password: ' + request.body.password);
 
   db.User.find({
     where: {
@@ -97,58 +96,147 @@ router.get('/app', util.checkUser, function(request, response) {
 
 // Get current user's friends
 router.get('/friends', util.checkUser, function(request, response) {
-  seq.query(
-      'SELECT Users.id, Users.username FROM Users where Users.id in (SELECT Friends.FriendId from Friends where Friends.UserId = ?)', {
-        replacements: [request.session.user],
-        type: sequelize.QueryTypes.SELECT
-      })
-    .then(function(friends) {
-      response.status(200).json({
-        friends
+
+
+
+  db.Friend.findAll({
+    where: {
+      UserId: request.session.user
+    }
+  }).then(function(friendList){
+    if(friendList && friendList.length > 0) {
+      var friendIds = friendList.map(function(friendConn){
+        return {
+          id: friendConn.friendId
+        }
       });
-    });
+
+      db.User.findAll({
+        where: {
+          $or: friendIds
+        }
+      }).then(function(friends){
+        var friends = friends.map(function(friend){
+          return {id: friend.id, username: friend.username};
+        });
+        response.status(200).json({ friends });
+      });
+    } else {
+      console.log("No Friends found for ", request.session.user);
+      response.sendStatus(404)
+    }
+  });
+
+
+
+
+
+
+
+  // seq.query(
+  //     'SELECT Users.id, Users.username FROM Users where Users.id in (SELECT Friends.FriendId from Friends where Friends.UserId = ?)', {
+  //       replacements: [request.session.user],
+  //       type: sequelize.QueryTypes.SELECT
+  //     })
+  //   .then(function(friends) {
+  //     console.log("LINE 126: ", friends);
+  //     response.status(200).json({
+  //       friends
+  //     });
+  //   });
 });
 
 // Add a friend to current user
 router.post('/friends', util.checkUser, function(request, response) {
-  console.log("request.body: ", request.body)
   var friend = request.body.friend;
-  console.log("friend: ", friend)
-  console.log("request.session.user: ", request.session.user)
+  console.log("Friend to add: ", friend)
+  console.log("Current user: ", request.session.user)
 
     db.User.find({
       where: {
         username: friend
       }
     }).then(function(foundFriend) {
-      console.log("foundFriend: ", foundFriend)
       if (foundFriend || foundFriend.id !== request.session.user) {
-        db.Friend.findOrCreate({
-          where: {
-            friendId: foundFriend.id,
-            UserId: request.session.user
-          }
-        }).spread(function(result) {
-          if (result.$options.isNewRecord === true) {
-            db.Friend.findOrCreate({
-              where: {
+
+        db.Friend.findOne({
+          where:{
+            $or: [
+              {
+                friendId: foundFriend.id,
+                UserId: request.session.user
+              },
+              {
                 friendId: request.session.user,
                 UserId: foundFriend.id
               }
-            }).spread(function(result) {
-              if (result.$options.isNewRecord === true) {
-                console.log('You two are bros now!')
-                response.sendStatus(201)
-              } else {
-                console.log("bromance already created inside")
-                response.sendStatus(409)
-              }
-            })
+            ]
+          }
+        }).then(function(result){
+          if(result === null){
+            // create connections
+            db.Friend.create({
+              friendId: foundFriend.id,
+              UserId: request.session.user
+            });
+            db.Friend.create({
+              friendId: request.session.user,
+              UserId: foundFriend.id
+            });
+            console.log('You two are bros now!')
+            response.sendStatus(201)
           } else {
-            console.log("bromance already created")
+            // connections already exist
+            console.log("bromance already created inside")
             response.sendStatus(409)
           }
-        });
+        })
+
+
+
+
+
+
+
+
+
+        // db.Friend.findOrCreate({
+        //   where: {
+        //     friendId: foundFriend.id,
+        //     UserId: request.session.user
+        //   }
+        // }).spread(function(result) {
+        //   if (result.$options.isNewRecord === true) {
+        //     db.Friend.findOrCreate({
+        //       where: {
+        //         friendId: request.session.user,
+        //         UserId: foundFriend.id
+        //       }
+        //     }).spread(function(result) {
+        //       if (result.$options.isNewRecord === true) {
+        //         console.log('You two are bros now!')
+        //         response.sendStatus(201)
+        //       } else {
+        //         console.log("bromance already created inside")
+        //         response.sendStatus(409)
+        //       }
+        //     })
+        //   } else {
+        //     console.log("bromance already created")
+        //     response.sendStatus(409)
+        //   }
+        // });
+        //
+
+
+
+
+
+
+
+
+
+
       } else {
         console.log("That friend doesn't exist, or you are that friend")
         response.sendStatus(400)
@@ -159,7 +247,6 @@ router.post('/friends', util.checkUser, function(request, response) {
 // Check one event
 router.get('/events/:id', util.checkUser, function(request, response) {
   var eventId = request.params.id;
-  console.log("eventId", eventId);
   seq.query(
       'SELECT Users.id, Users.username FROM Users where Users.id in (SELECT Friends.FriendId from Friends where Friends.UserId = ?)', {
         replacements: [request.session.user],
@@ -167,10 +254,7 @@ router.get('/events/:id', util.checkUser, function(request, response) {
       })
     .then(function(friendList) {
       if (!!friendList && friendList.length !== 0) {
-        console.log("friendList: ", friendList)
         var friendIds = friendList.map(function(usersFriends) {
-
-          console.log("usersFriends: ", usersFriends.id)
           return {
             UserId: {
               $eq: usersFriends.id
@@ -205,11 +289,9 @@ router.get('/events', util.checkUser, function(request, response) {
         type: sequelize.QueryTypes.SELECT
       })
     .then(function(friendList) {
-      console.log("friendList:", friendList);
       if(!!friendList && friendList.length !== 0) {
         var friendIds = friendList.map(function(usersFriends) {
 
-          console.log("usersFriends: ", usersFriends.id)
           return {
             UserId: {
               $eq: usersFriends.id
@@ -218,10 +300,7 @@ router.get('/events', util.checkUser, function(request, response) {
         });
 
         var timelimit = new Date();
-        console.log(timelimit);
-
         timelimit.setHours(timelimit.getHours() - 1);
-        console.log(timelimit);
 
         db.Event.findAll({
           where: {
@@ -233,7 +312,6 @@ router.get('/events', util.checkUser, function(request, response) {
           }
         }).then(function(results) {
           if (results) {
-            console.log("items: ", results)
             // var results = item.map(function(item, index) {
             //   if(friendList[index]){
             //     item.dataValues.username = friendList[index].username;
@@ -278,8 +356,6 @@ router.post('/events/:id', util.checkUser, function(request, response) {
             var centralLatLong;
             centralLatLong = util.getCentralPoints(ownerPoints,
               acceptedPoints, 1)
-            console.log("acceptedEvent: ", JSON.stringify(acceptedEvent,
-              null, "\t"));
             acceptedEvent.acceptedName = acceptor.username;
             acceptedEvent.acceptedId = request.session.user; // TO TEST
             acceptedEvent.acceptedLat = acceptedLat;
@@ -295,10 +371,8 @@ router.post('/events/:id', util.checkUser, function(request, response) {
 
             db.User.findById(request.session.user)
             .then(function (currentUser) {
-              console.log("currentUser")
               db.Event.findById(currentUser.currentEvent)
               .then(function (currentEvent) {
-                console.log("currentEvent")
                 currentEvent.update({
                   accepted: true
                 })
@@ -310,7 +384,7 @@ router.post('/events/:id', util.checkUser, function(request, response) {
                 currentEvent: acceptedEvent.id
               })
               .then(function () {
-                console.log("currentEvent updated for", request.session.user)
+                console.log("currentEvent updated for userid", request.session.user)
               })
           })
       } else {
@@ -342,7 +416,8 @@ router.post('/events', util.checkUser, function(request, response) {
         createdAt: {
           $gt: timelimit
         },
-        accepted: false
+        accepted: false,
+        eventType: 1
       }
     }).then(function(result) {
       if(result === null) {
@@ -385,7 +460,6 @@ router.post('/events', util.checkUser, function(request, response) {
   } else {
     console.log("Bro, some or all your incoming data is null, bro")
     response.sendStatus(400)
-    response.end()
   }
 });
 
@@ -396,7 +470,6 @@ router.get('/user', util.checkUser, function (request, response) {
       id: request.session.user
     }
   }).then(function(result){
-    console.log("/user db search result:", result);
     var user = {
       id: result.id,
       username: result.username,

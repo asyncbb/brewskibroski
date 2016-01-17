@@ -9,37 +9,25 @@ var dbPass = "";
 var sequelize = null;
 
 // Heroku-ClearDB Code
-if (process.env.CLEARDB_DATABASE_URL) {
-  // the application is executed on Heroku ... use the postgres database
-  var dbUrl = url.parse(process.env.CLEARDB_DATABASE_URL);
-  sequelize = new Sequelize(dbUrl.pathname.slice(1), dbUrl.auth.split(":")[0],  dbUrl.auth.split(":")[1], {
-    dialect:  'mysql',
-    protocol: 'mysql',
-    host:     dbUrl.hostname,
-    logging:  true
-  })
+// if (process.env.CLEARDB_DATABASE_URL) {
+//   // the application is executed on Heroku ... use the postgres database
+//   var dbUrl = url.parse(process.env.CLEARDB_DATABASE_URL);
+//   sequelize = new Sequelize(dbUrl.pathname.slice(1), dbUrl.auth.split(":")[0],  dbUrl.auth.split(":")[1], {
+//     dialect:  'mysql',
+//     protocol: 'mysql',
+//     host:     dbUrl.hostname,
+//     logging:  true
+//   })
+
+
+if(process.env.CLEARDB_DATABASE_URL){
+  sequelize = new Sequelize(process.env.CLEARDB_DATABASE_URL);
+// } else if(process.env.DATABASE_URL){
+//   sequelize = new Sequelize(process.env.DATABASE_URL);
 } else {
   // the application is executed on the local machine ... use mysql
   sequelize = new Sequelize(dbName, dbUser, dbPass);
 }
-
-
-// Heroku Postgres Code - Does NOT create relations!
-
-// if (process.env.DATABASE_URL) {
-//   // the application is executed on Heroku ... use the postgres database
-//   var match = process.env.DATABASE_URL.match(/postgres:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/)
-//   sequelize = new Sequelize(match[5], match[1], match[2], {
-//     dialect:  'postgres',
-//     protocol: 'postgres',
-//     port:     match[4],
-//     host:     match[3],
-//     logging:  true //false
-//   })
-// } else {
-//   // the application is executed on the local machine ... use mysql
-//   sequelize = new Sequelize(dbName, dbUser, dbPass);
-// }
 
 // Sequelize Models
 // based on SQL schema
@@ -140,6 +128,10 @@ var Event = sequelize.define('Event', {
       max: 180.0
     },
     defaultValue: null
+  },
+  UserId: {
+    type: Sequelize.INTEGER,
+    allowNull: false
   }
 }, {
   timestamps: true,
@@ -152,17 +144,21 @@ var Friend = sequelize.define('Friend', {
     type: Sequelize.INTEGER,
     allowNull: false
   },
+  UserId: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  }
 }, {
   timestamps: true
 });
 
 // Relationships Setup
 
-Friend.belongsTo(User);
-Event.belongsTo(User);
-
-User.hasMany(Friend);
-User.hasMany(Event);
+// Friend.belongsTo(User);
+// Event.belongsTo(User);
+//
+// User.hasMany(Friend);
+// User.hasMany(Event);
 
 // Create the tables in the database
 
